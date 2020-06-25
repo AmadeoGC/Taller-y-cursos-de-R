@@ -479,6 +479,7 @@ datos_fifa <- read_csv("players_fifa_20.csv")
 
 head(datos_fifa)
 
+dim(datos_fifa)
 
 glimpse(datos_fifa)
 skim(datos_fifa)
