@@ -1,8 +1,8 @@
 ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-### TALLER DE INTRODUCCI覰 A R                                            -----      
-### MANIPULACI覰 Y VISUALIZACI覰 DE DATOS EN R Y TIDYVERSE (PARTE 1)      -----
+### TALLER DE INTRODUCCI?N A R                                            -----      
+### MANIPULACI?N Y VISUALIZACI?N DE DATOS EN R Y TIDYVERSE (PARTE 1)      -----
 ### 
-### Autor: Amadeo Guzm醤
+### Autor: Amadeo Guzm?n
 ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -56,11 +56,11 @@ paste0("el resultado de b/a es = ", resultado)
 
 #
 ##
-### Cargar librer韆s al entorno de trabajo -----
+### Cargar librerias al entorno de trabajo -----
 ##
 #
 
-# instalar paquetes (librer韆s) en el pc --> Solo se hace 1 vez 
+# instalar paquetes (librer?as) en el pc --> Solo se hace 1 vez 
 
 #install.packages(c("tidyverse", "lubridate", "janitor", "ggthemes", "scales"))
 
@@ -78,7 +78,7 @@ library(readxl)
 
 #
 ##
-###   PARTE 1: BASE DE DATOS CON MEDICIONES DE ALETA Y CULMEN EN PING躀NOS DE LA ESTACI覰 PALMER ----------------------------------------------------------------------------------------------------
+###   PARTE 1: BASE DE DATOS CON MEDICIONES DE ALETA Y CULMEN EN PING?INOS DE LA ESTACI?N PALMER ----------------------------------------------------------------------------------------------------
 ##
 #
 
@@ -94,7 +94,7 @@ library(readxl)
 
 
 # cargar datos desde nuestra carpeta de trabajo
-getwd() # con esta funci髇 vamos a conocer cual es el directorio de trabajo actual
+getwd() # con esta funci?n vamos a conocer cual es el directorio de trabajo actual
 
 datos <- read_excel("bd_pinguinos.xlsx")
 
@@ -114,8 +114,6 @@ View(datos)    #para ver toda la base de datos
 #
 #   1.2.- Explorar la base de datos -----
 #
-
-
 
 dim(datos)     #cantidad de filas y columnas del dataframe
 names(datos)   #nombres de las variables
@@ -137,8 +135,6 @@ table(datos$species, datos$island)
 
 
 ########################################################################+
-
-
 
 
 
@@ -335,10 +331,6 @@ g1 +
 g1 + 
   coord_flip
 
-#podemos probar otros sistemas de coordenadas... no siempre es la mejor idea, pero sirve para explorar
-g1 + 
-  coord_polar()
-
 
 
 ## Tipo Violin
@@ -372,8 +364,8 @@ datos %>%
   ggplot(mapping = aes(x= species, y=flipper_length_mm, fill=sex)) +
   geom_boxplot(alpha=.7)
 
-#Nota: eliminar los datos faltantes y realizar otro tipo de manipulaciones de datos te permitir? explorar de mejor forma tus datos... esto es todo un tema por si mismo y se podr?a abordar en otro taller..... quiz?s......??
 
+#Nota: eliminar los datos faltantes y realizar otro tipo de manipulaciones de datos te permitir? explorar de mejor forma tus datos... esto es todo un tema por si mismo y se podr?a abordar en otro taller..... quiz?s......??
 
 
 #################################### -- EJERCICIO -- ############################################################+
@@ -394,7 +386,7 @@ datos %>%
 
 # IMPORTANTE: desde aqui seguiremos ocupando la sintaxis con (%>%)
 
-#volvemos a ocupa run g磖afico de los que ya hicimos anteriormente....
+#volvemos a ocupar un g?rafico de los que ya hicimos anteriormente....
 datos %>% 
   #manipulaci?n de datos
   filter(!is.na(sex)) %>% 
@@ -438,8 +430,8 @@ datos %>%
   geom_boxplot(alpha=.8, outlier.color = NA) +
   facet_wrap(~sex) +
     #titulos
-  labs(title="Relacion entre el largo de la aleta y la especie de ping黫no observada",
-       subtitle="Registros de 3 especies (Adelle, Chinstrap y Gentoo) en la esaci髇 PALMER",
+  labs(title="Relacion entre el largo de la aleta y la especie de ping?ino observada",
+       subtitle="Registros de 3 especies (Adelle, Chinstrap y Gentoo) en la esaci?n PALMER",
        x="\n Especie",
        y="Largo de aleta (mm) \n", 
        caption = "Fuente: Long Term Ecological Research Network") +
@@ -481,39 +473,136 @@ ggsave("graf_final.png", gra_final, dpi = 500, units = "cm", width = 28, height 
 #
 
 
+datos_fifa <- read_csv("players_20.csv")
+
+
+head(datos_fifa)
+
+glimpse(datos_fifa)
+
+
+# Algunas manipulaciones basicas de la base de datos
+
+#TOP 5 en base a puntuaci贸n general 
+datos_fifa %>% 
+  select(short_name, overall) %>% 
+  arrange(desc(overall)) %>% 
+  top_n(5)
+
+#TOP 3 en base a precio de mercado
+datos_fifa %>% 
+  select(short_name, value_eur) %>% 
+  arrange(desc(value_eur)) %>% 
+  top_n(3)
+
+
+#.....Chile TOP5 en base a puntuaci贸n
+datos_fifa %>% 
+  filter(nationality == "Chile") %>%
+  select(short_name, club, overall) %>%
+  arrange(desc(overall)) %>% 
+  top_n(5)
+
+
+#planilla mas cara
+datos_fifa %>% 
+  group_by(club) %>% 
+  summarize(total_eur = sum(value_eur)) %>% 
+  arrange(desc(total_eur))
 
 
 
 
 
+# Veamos algunos gr谩ficos generales combinando manipulaci贸n y visualizacion
+
+
+datos_fifa %>% 
+  group_by(nationality) %>% 
+  summarize(ptje_mean = mean(overall),
+            n = n()) %>% 
+  filter(n >= 100) %>% 
+    #aqui parte el gafico
+  ggplot(aes(nationality, ptje_mean)) +
+  geom_col()
+
+
+(graf_col_chile <- datos_fifa %>% 
+  group_by(nationality) %>% 
+  summarize(ptje_mean = mean(overall),
+            n = n()) %>% 
+  filter(n >= 100) %>% 
+  #aqui parte el gafico
+  ggplot(aes(fct_reorder(nationality, ptje_mean), ptje_mean, fill=if_else(nationality=="Chile", "Chile", "Otro"))) +
+  geom_col() +
+  scale_fill_manual(values = c("firebrick", "grey60")) +
+  #geom_text(aes(label=paste0(nationality, " {", round(ptje_mean,1),"}")), 
+  #          angle=90, 
+  #          color="white",
+  #          size=3, 
+  #          position = position_stack(vjust = 0.15)) +
+  labs(title= "Puntaje promedio por pa铆s en FIFA 2020",
+       subtitle = "Solo se consideran paises con mas de 100 jugadores",
+       y="Puntaje promedio",
+       x=NULL,
+       caption = "Fuente: FIFA 2020 | EA Sports") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        panel.grid.major.y = element_blank(),
+        axis.ticks.y = element_line(),
+        plot.caption = element_text(face = "italic", size=8, color="grey70")) +
+  coord_flip(expand = FALSE)
+)
 
 
 
 
+(graf_2 <- datos_fifa %>% 
+  filter(nationality == "Chile") %>% 
+  ggplot() +
+  geom_jitter(aes(age, overall, color = international_reputation > 2, drop=short_name), alpha=.5, size=2.5) +
+  geom_smooth(aes(age, overall)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+)
 
 
 
+#install.packages("plotly")
+library(plotly)
+
+ggplotly(graf_2)
 
 
 
+(fifa_1 <- datos_fifa %>% 
+  filter(overall>85) %>% 
+  ggplot(aes(power_shot_power, attacking_finishing, label = short_name, color = preferred_foot))+
+  geom_text_repel(size=3)+
+  theme_minimal()+
+  theme(legend.position = "bottom")+
+  geom_jitter(alpha = 0.3, size = 2.5, width = 0.3, height = 0.3)+
+  geom_smooth(method = "lm", color = "gray40", lty = 2, se = TRUE, size = 0.6, alpha=.1)+
+  scale_color_manual(values = c("orangered","steelblue")) +
+  labs(title = "Relaci贸n entre la potencia del disparo, la capacidad de finiquito en ataque y el pie dominante",
+       subtitle = "Jugadores con valoraci贸n (overall) mayor > 85 en FIFA 2020")
+)
+
+
+ggplotly(fifa_1) #interactivo
 
 
 
+#Guarda tu grafico... debes completar los elementos que necesitas
+ggsave()
 
 
 
+#############################################  FIN  ####################################################+
 
 
 
-
-  
-#Nota: Esto es lo general y el punto de partida para poder hacer mejores visualizaciones y explorar tus datos con mayor profundidad.
-
-#########################################  FIN  #########################################+
-
-
-
-### Bonus Track
+### IMPORTANTE
 
 #
 # Errores comunes -----
