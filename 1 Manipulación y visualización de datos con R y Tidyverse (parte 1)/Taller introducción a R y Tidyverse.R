@@ -22,21 +22,23 @@
 # Un data frame es una colecci贸n rectangular de variables (columnas) y observaciones (filas) -> Cada columna DEBE ser una variable y cada fila DEBE ser una observaci贸n
 
 
-# IMPORTANTE --> Para ejecutar un codigo en R puedes: (1) poner el cursor sobre el c贸digo y apretar Ctrl + Enter; (2) seleccionar el c贸digo y hacer clik en "Run"
+# IMPORTANTE --> Para ejecutar un codigo en R puedes: (1) poner el cursor sobre el c贸digo y apretar Ctrl + Enter; (2) seleccionar el codigo y hacer clik en "Run" (esquina superior derecha de la consola)
 
 
-#lo mas bacio que debemos saber.......
+#lo mas basico que debemos saber.......
 2+2
 
-a <- 5 #guardamos el valor 5 como un objeto de nombre "a"
-a      #llamamos al objeto "a" para conocer su valor
+a <- 5    #guardamos el valor 5 como un objeto de nombre "a"
+a         #llamamos al objeto "a" para conocer su valor
 
-(b <- 15) #usando parentesis R nos muestra inmediatamente el resultado del objeto
+(b <- 15) #usando parentesis R nos muestra inmediatamente el resultado del objeto que creamos
+
 
 #podemos hacer operaciones con estos objetos
 b/a
 a*b
 (exp(a)-sqrt(b))/100
+
 
 #podemos guardar el resultado de una operacion matematica como un objeto
 (resultado <-  b/a)
@@ -61,7 +63,6 @@ paste0("el resultado de b/a es = ", resultado)
 #
 
 # instalar paquetes (librer?as) en el pc --> Solo se hace 1 vez 
-
 #install.packages(c("tidyverse", "lubridate", "janitor", "ggthemes", "scales"))
 
 
@@ -69,7 +70,6 @@ paste0("el resultado de b/a es = ", resultado)
 library(tidyverse)
 library(scales)
 library(ggthemes)
-library(palmerpenguins)
 
 library(skimr) #si no te reconoce esta libreria la debes instalar y despues cargar
 library(readxl)
@@ -96,17 +96,16 @@ library(ggrepel)
 # cargar datos desde nuestra carpeta de trabajo
 getwd() # con esta funci?n vamos a conocer cual es el directorio de trabajo actual
 
-datos <- read_excel("bd_pinguinos.xlsx", sheet = 1)
+datos <- read_excel("bd_pinguinos.xlsx", sheet = 1) #la funcion read_excel() nos permite cargar archivos de trabajo en formato .xlsx
 
 
 # con la funci?n head() vemos por defecto las primeras 6 lineas de cada base de datos
 head(datos)
-tail(datos)
-
 head(datos, 20) #tambien podemos elegir el n?mero de filas que queremos ver
 
-View(datos)    #para ver toda la base de datos
+tail(datos)    #con la funci髇 tail() vemos los ultimos 6 registros
 
+View(datos)    #para ver toda la base de datos
 
 
 
@@ -155,11 +154,9 @@ table(datos$species, datos$island)
 # funciona en base a capas de informaci?n
 
 
-
 # _1.3.1 Elementos de Est?tica o aes() ----
 
-
-ggplot()
+ggplot() #ggplot() es la funcion que nos permite ir armando nuestras capas de grafico
 
 ggplot(data = datos,
        mapping = aes(x = flipper_length_mm, y = body_mass_g))
@@ -190,18 +187,10 @@ ggplot(data = datos,
   geom_point()
 
 
-
-#alternar est?ticas visuales y caracter?sticas fijas
+#alternar esteticas visuales y caracteristicas fijas
 ggplot(data = datos,
        mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
-  geom_point(size=3)
-
-
-#agregar transparencia a los puntos (para disminuir el efecto de la sobreposici?n de puntos)
-ggplot(data = datos,
-       mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
-  geom_point(size=3, alpha = 0.4) #alpha toma valores entre 0 y 1
-
+  geom_point(size=3, alpha = 0.4) ##con el argumento "alpha" agregamos transparencia a los puntos (para disminuir el efecto de la sobreposici?n de puntos)
 
 
 #NOTA: Una vez que mapeamos variables con propiedades est?ticas, el paquete ggplot2 selecciona una escala razonable para usar con la est?tica elegida 
@@ -238,7 +227,6 @@ ggplot(data = datos,
 
 
 
-
 ##########################################################################################################+
 
 
@@ -262,8 +250,7 @@ ggplot(data = datos,
 ggplot(data = datos,
        mapping = aes(x = culmen_length_mm, y = culmen_depth_mm, color=species)) +
   geom_point(size=2.5) +
-  geom_smooth(method = "lm")
-
+  geom_smooth(method = "lm", alpha=.2)
 
 
 #Nota: Lo que acabamos de ver es un ejemplo de lo que en estad?stica y probabilidad se conoce como la "Paradoja de Simpson" --> Una tendencia que aparece en varios grupos de datos desaparece cuando estos grupos se combinan y en su lugar aparece la tendencia contraria para los datos agregados (https://es.wikipedia.org/wiki/Paradoja_de_Simpson#:~:text=En%20probabilidad%20y%20estad%C3%ADstica%2C%20la,contraria%20para%20los%20datos%20agregados.)
@@ -301,7 +288,6 @@ ggplot(data = datos,
 
 
 # Si pudiste hacer el gr?fico anterior..... ahora prueba usando el argumento "fill" dentro de aes()
-
 
 
 #################################################################################################################+
@@ -398,7 +384,7 @@ datos %>%
 
 # IMPORTANTE: desde aqui seguiremos ocupando la sintaxis con (%>%)
 
-#volvemos a ocupar un g?rafico de los que ya hicimos anteriormente....
+#volvemos a ocupar uno g?rafico de los que ya hicimos anteriormente....
 datos %>% 
   #manipulaci?n de datos
   filter(!is.na(sex)) %>% 
@@ -442,8 +428,8 @@ datos %>%
   geom_boxplot(alpha=.8, outlier.color = NA) +
   facet_wrap(~sex) +
     #titulos
-  labs(title="Relacion entre el largo de la aleta y la especie de ping?ino observada",
-       subtitle="Registros de 3 especies (Adelle, Chinstrap y Gentoo) en la esaci?n PALMER",
+  labs(title="Relacion entre el largo de la aleta y la especie de pinguino observada",
+       subtitle="Registros de 3 especies (Adelle, Chinstrap y Gentoo) en la estacion PALMER",
        x="\n Especie",
        y="Largo de aleta (mm) \n", 
        caption = "Fuente: Long Term Ecological Research Network") +
@@ -471,10 +457,14 @@ gra_final + theme_economist()
 gra_final + theme_hc()
 
 
-#Quieres guardar t? gr?fico???
+
+#Quieres guardar t? grafico???
 ggsave("graf_final.png", gra_final, dpi = 500, units = "cm", width = 28, height = 14)
 
  
+
+
+
 
 
 
@@ -485,7 +475,7 @@ ggsave("graf_final.png", gra_final, dpi = 500, units = "cm", width = 28, height 
 #
 
 #En esta oportunidad vamos a cargar una base de datos de formato .csv -> Antes de cargarla en R abrela directamente en Excel y mira como se ve
-datos_fifa <- read_csv("players_20.csv")
+datos_fifa <- read_csv("players_fifa_20.csv")
 
 head(datos_fifa)
 
@@ -525,8 +515,6 @@ datos_fifa %>%
 
 
 
-
-
 # Veamos algunos gr谩ficos generales combinando manipulaci贸n y visualizacion
 
 #puntaje promedio por pa韘
@@ -537,6 +525,7 @@ datos_fifa %>%
     #aqui parte el gafico
   ggplot(aes(nationality, ptje_mean)) +
   geom_col()
+
 
 #.... no se ve nada. Mejoremos el gr醘ico anterior
 #pero antes veamos cual es el valor promedio general de todos los paises
@@ -596,10 +585,13 @@ datos_fifa %>%
 )
 
 
+#No solo graficos estaticos....tambien los podemos hacer interactivos facilmente con la libreria {Plotly}
 #install.packages("plotly")
 library(plotly)
 
 ggplotly(graf_2) #agregamos un poco de interactividad....
+
+
 
 
 #Ejemplo 3: Relacion entre la potencia del disparo, la capacidad de finiquito en ataque y el pie dominante
