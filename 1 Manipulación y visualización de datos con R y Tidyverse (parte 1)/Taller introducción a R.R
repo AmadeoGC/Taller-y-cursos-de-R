@@ -71,9 +71,9 @@ library(scales)
 library(ggthemes)
 library(palmerpenguins)
 
-library(skimr)
+library(skimr) #si no te reconoce esta libreria la debes instalar y despues cargar
 library(readxl)
-
+library(ggrepel)
 
 
 #
@@ -96,7 +96,7 @@ library(readxl)
 # cargar datos desde nuestra carpeta de trabajo
 getwd() # con esta funci?n vamos a conocer cual es el directorio de trabajo actual
 
-datos <- read_excel("bd_pinguinos.xlsx")
+datos <- read_excel("bd_pinguinos.xlsx", sheet = 1)
 
 
 # con la funci?n head() vemos por defecto las primeras 6 lineas de cada base de datos
@@ -122,6 +122,14 @@ glimpse(datos) #resumen de las caracter?sticas de cada variable
 
 #resumen general de todo el data set
 skim(datos)
+
+#si las variables que aprecen como <chr> las convertimos en factor (as.factor) nos entrega un mejor resumen de sus datos
+skim(datos %>% 
+       mutate(species = as.factor(species),
+              island = as.factor(island),
+              sex = as.factor(sex))
+     )
+
 
 #otra forma de obtener un resumen estad?stico
 summary(datos)
@@ -167,8 +175,8 @@ ggplot(data = datos,
   geom_point(color = "blue", shape=3)
 
 
-#Podemos agregar m?s elementos al gr?fico, pero esta vez asociado a las VARIABLES de la base de datos
-#Esto es necesario hacerlo dentro del par?metro aes()
+#Podemos agregar mas elementos al grafico, pero esta vez asociado a las VARIABLES de NUESTROS DATOS
+#Esto es necesario hacerlo dentro del argumento aes()
 
 #color
 ggplot(data = datos,
@@ -225,8 +233,8 @@ ggplot(data = datos,
 
 
 ##########################################  EJERCICIO  ####################################################+
-# ?Qu? pasa si asignamos el color a una variable cuantitativa, pero con una condici?n?? 
-# ocupa la siguiente condici?n: color = culmen_length_mm >45
+# Que pasa si asignamos el color a una variable cuantitativa, pero con una condicion?? 
+# ocupa la siguiente condicion: color = culmen_length_mm >45
 
 
 
@@ -237,7 +245,7 @@ ggplot(data = datos,
 #IMPORTANTE: Hacer visualizaciones no es solo poner alguna variable en cada eje, algo de color y listo. Debemos explorar los datos e intentar encontrar las relaciones que puedan existir. Debemos abordar este problema desde diferentes perspectivas y evitar caer en posibles "sesgos" o malas interpretaciones.
 
 #Ejemplo
-#Existe alg?n tipo de relaci?n entre las variables "culmen_length_mm" y "culmen_depth_mm"??
+#Existe algun tipo de relacion entre las variables "culmen_length_mm" y "culmen_depth_mm"??
 
 ggplot(data = datos,
        mapping = aes(x = culmen_length_mm, y = culmen_depth_mm)) +
@@ -250,13 +258,13 @@ ggplot(data = datos,
   geom_smooth(method = "lm")
 
 
-#Esta relaci?n es real?? Existen otras variables que puedan modificar el sentido de esta relaci?n??
+#Esta relacion es real?? Existen otras variables que puedan modificar el sentido de esta relaci?n??
 ggplot(data = datos,
        mapping = aes(x = culmen_length_mm, y = culmen_depth_mm, color=species)) +
   geom_point(size=2.5) +
   geom_smooth(method = "lm")
 
-# Que cambi??
+
 
 #Nota: Lo que acabamos de ver es un ejemplo de lo que en estad?stica y probabilidad se conoce como la "Paradoja de Simpson" --> Una tendencia que aparece en varios grupos de datos desaparece cuando estos grupos se combinan y en su lugar aparece la tendencia contraria para los datos agregados (https://es.wikipedia.org/wiki/Paradoja_de_Simpson#:~:text=En%20probabilidad%20y%20estad%C3%ADstica%2C%20la,contraria%20para%20los%20datos%20agregados.)
 
@@ -264,7 +272,7 @@ ggplot(data = datos,
 
 
 #
-# _1.3.2  Otros objetos geom?tricos disponibles ----
+# _1.3.2  Otros objetos geometricos disponibles ----
 #
 
 ## Histogramas
@@ -362,15 +370,19 @@ ggplot(data = datos,
 datos %>% 
   filter(!is.na(sex)) %>% 
   ggplot(mapping = aes(x= species, y=flipper_length_mm, fill=sex)) +
-  geom_boxplot(alpha=.7)
+  geom_boxplot(alpha=.7) +
+   #en la siguiente linea vamos a asignar colores manualmente
+  scale_fill_manual(values = c("#DE982E","#245F96")) # puedes elegir colores desde este link: https://htmlcolorcodes.com/es/
 
 
-#Nota: eliminar los datos faltantes y realizar otro tipo de manipulaciones de datos te permitir? explorar de mejor forma tus datos... esto es todo un tema por si mismo y se podr?a abordar en otro taller..... quiz?s......??
+
+
+#Nota: eliminar los datos faltantes y realizar otro tipo de manipulaciones de datos te permitira explorar de mejor forma tus datos... esto es todo un tema por si mismo y se podria abordar en otro taller..... quiz?s......??
 
 
 #################################### -- EJERCICIO -- ############################################################+
 # Una de las ventajas de hacer gr?ficos con ggplot2 es la posibilidad de combinar capas geom?tricas....
-# Haz un gr?fico combinando dos capas geom?tricas 
+# Haz un gr?fico combinando dos o m醩 capas geom?tricas 
 
 
 
@@ -472,16 +484,17 @@ ggsave("graf_final.png", gra_final, dpi = 500, units = "cm", width = 28, height 
 ##
 #
 
-
+#En esta oportunidad vamos a cargar una base de datos de formato .csv -> Antes de cargarla en R abrela directamente en Excel y mira como se ve
 datos_fifa <- read_csv("players_20.csv")
-
 
 head(datos_fifa)
 
+
 glimpse(datos_fifa)
+skim(datos_fifa)
 
 
-# Algunas manipulaciones basicas de la base de datos
+# Algunas manipulaciones basicas de la base de datos 
 
 #TOP 5 en base a puntuaci贸n general 
 datos_fifa %>% 
@@ -516,47 +529,63 @@ datos_fifa %>%
 
 # Veamos algunos gr谩ficos generales combinando manipulaci贸n y visualizacion
 
-
+#puntaje promedio por pa韘
 datos_fifa %>% 
   group_by(nationality) %>% 
   summarize(ptje_mean = mean(overall),
             n = n()) %>% 
-  filter(n >= 100) %>% 
     #aqui parte el gafico
   ggplot(aes(nationality, ptje_mean)) +
   geom_col()
 
+#.... no se ve nada. Mejoremos el gr醘ico anterior
+#pero antes veamos cual es el valor promedio general de todos los paises
+(prom_total <- datos_fifa %>% 
+    group_by(nationality) %>% 
+    summarize(ptje_mean = mean(overall)) %>% 
+    summarize(promedio = mean(ptje_mean)) 
+)
 
+#... y el de chile
+(prom_chile <- datos_fifa %>% 
+  group_by(nationality) %>% 
+  summarize(ptje_mean = mean(overall),
+            n = n()) %>% 
+  filter(nationality == "Chile")
+)
+
+
+
+#ahora si....Mejoremos el gr醘ico anterior
 (graf_col_chile <- datos_fifa %>% 
   group_by(nationality) %>% 
   summarize(ptje_mean = mean(overall),
             n = n()) %>% 
-  filter(n >= 100) %>% 
-  #aqui parte el gafico
+  filter(n >= 100) %>% #aplicamos un filtro para selccionar paises con una determinada caracteristica
+      #aqui parte el gafico
   ggplot(aes(fct_reorder(nationality, ptje_mean), ptje_mean, fill=if_else(nationality=="Chile", "Chile", "Otro"))) +
   geom_col() +
   scale_fill_manual(values = c("firebrick", "grey60")) +
-  #geom_text(aes(label=paste0(nationality, " {", round(ptje_mean,1),"}")), 
-  #          angle=90, 
-  #          color="white",
-  #          size=3, 
-  #          position = position_stack(vjust = 0.15)) +
   labs(title= "Puntaje promedio por pa铆s en FIFA 2020",
        subtitle = "Solo se consideran paises con mas de 100 jugadores",
-       y="Puntaje promedio",
+       y="Overall",
        x=NULL,
        caption = "Fuente: FIFA 2020 | EA Sports") +
+  geom_hline(yintercept = prom_total$promedio, lty=2, color="darkblue") +
+  annotate("text", x=3, y=prom_total$promedio+0.5, label=paste0("Promedio {", round(prom_total$promedio,1), "}"), size=2.5, angle=90, color="darkblue") +
   theme_minimal() +
   theme(legend.position = "none",
         panel.grid.major.y = element_blank(),
         axis.ticks.y = element_line(),
         plot.caption = element_text(face = "italic", size=8, color="grey70")) +
-  coord_flip(expand = FALSE)
+  coord_flip(expand = FALSE) +
+  geom_text(data=prom_chile, aes(label=round(ptje_mean,1)), size=2.8, hjust= 1.1, color="white", vjust=0.25)
 )
 
 
 
-
+#Ejemplo2: relaci髇 entre edad y puntaje general en jugadores nacionales (Chile).... adem醩 identificaremos cuantos tienen 
+#reputaci髇 internacional > 2
 (graf_2 <- datos_fifa %>% 
   filter(nationality == "Chile") %>% 
   ggplot() +
@@ -567,14 +596,13 @@ datos_fifa %>%
 )
 
 
-
 #install.packages("plotly")
 library(plotly)
 
-ggplotly(graf_2)
+ggplotly(graf_2) #agregamos un poco de interactividad....
 
 
-
+#Ejemplo 3: Relacion entre la potencia del disparo, la capacidad de finiquito en ataque y el pie dominante
 (fifa_1 <- datos_fifa %>% 
   filter(overall>85) %>% 
   ggplot(aes(power_shot_power, attacking_finishing, label = short_name, color = preferred_foot)) +
@@ -584,7 +612,7 @@ ggplotly(graf_2)
   geom_jitter(alpha = 0.3, size = 2.5, width = 0.3, height = 0.3)+
   geom_smooth(method = "lm", color = "gray40", lty = 2, se = TRUE, size = 0.6, alpha=.1)+
   scale_color_manual(values = c("orangered","steelblue")) +
-  labs(title = "Relaci贸n entre la potencia del disparo, la capacidad de finiquito en ataque y el pie dominante",
+  labs(title = "Relacion entre la potencia del disparo, la capacidad de finiquito en ataque y el pie dominante",
        subtitle = "Jugadores con valoraci贸n (overall) mayor > 85 en FIFA 2020")
 )
 
@@ -623,7 +651,7 @@ ggsave()
 #En Twitter usando #Rstats
 
 
-#Como no perderme en estas casi 500 l?neas de c?digo?? --> Mira en la parte superior derecha del editor (script) aparecen unas l?neas horizonatales en forma de ?ndice... haz click en ellas.....
+#Como no perderme en estas casi 650 lineas de codigo?? --> Mira en la parte superior derecha del editor (script) aparecen unas l?neas horizonatales en forma de ?ndice... haz click en ellas.....
 
 
 
