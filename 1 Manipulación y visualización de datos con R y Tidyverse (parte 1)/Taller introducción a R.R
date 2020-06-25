@@ -577,7 +577,7 @@ ggplotly(graf_2)
 
 (fifa_1 <- datos_fifa %>% 
   filter(overall>85) %>% 
-  ggplot(aes(power_shot_power, attacking_finishing, label = short_name, color = preferred_foot))+
+  ggplot(aes(power_shot_power, attacking_finishing, label = short_name, color = preferred_foot)) +
   geom_text_repel(size=3)+
   theme_minimal()+
   theme(legend.position = "bottom")+
