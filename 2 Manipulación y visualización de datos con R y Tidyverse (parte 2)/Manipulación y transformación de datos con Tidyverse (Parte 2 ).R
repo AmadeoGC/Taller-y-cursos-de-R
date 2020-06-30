@@ -218,15 +218,3 @@ starwars %>%
   summarize(promedio.IMC = mean(IMC, na.rm = TRUE)) %>% 
   arrange(desc(promedio.IMC))
 
-
-
-#
-### pivot_longer() -----
-#
-
-
-
-#
-### pivot_wider()
-#
-
